@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Balance de Línea</title>
+
+  <!-- Bootstrap + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#0a0e1a;
+      --bg2:#0f1729;
+      --glass: rgba(255,255,255,.06);
+      --glass2: rgba(255,255,255,.1);
+      --border: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.95);
+      --muted: rgba(255,255,255,.6);
+      --accent1: #667eea;
+      --accent2: #764ba2;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+    body{
+      color: var(--text);
+      background:
+        radial-gradient(ellipse 1400px 800px at 15% 10%, rgba(102, 126, 234, 0.15), transparent 50%),
+        radial-gradient(ellipse 1200px 700px at 85% 15%, rgba(118, 75, 162, 0.12), transparent 50%),
+        radial-gradient(ellipse 1000px 600px at 50% 90%, rgba(16, 185, 129, 0.08), transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before{
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: 
+        repeating-linear-gradient(0deg, rgba(255,255,255,.015) 0px, transparent 1px, transparent 2px, rgba(255,255,255,.015) 3px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0px, transparent 1px, transparent 2px, rgba(255,255,255,.015) 3px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glass{
+      background: var(--glass);
+      border: 1px solid var(--border);
+      box-shadow: 
+        0 8px 32px rgba(0,0,0,.3),
+        inset 0 1px 0 rgba(255,255,255,.08);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: all .3s ease;
+    }
+    .glass::before{
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+    }
+    .glass:hover{
+      transform: translateY(-2px);
+      box-shadow: 
+        0 12px 48px rgba(0,0,0,.4),
+        inset 0 1px 0 rgba(255,255,255,.12);
+    }
+    .glass-strong{
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.08));
+      border: 1px solid rgba(255,255,255,.15);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 
+        0 8px 32px rgba(0,0,0,.25),
+        inset 0 1px 0 rgba(255,255,255,.1);
+    }
+    .glass-strong::after{
+      content: '';
+      position: absolute;
+      top: -50%; right: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,.03) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .brand-badge{
+      display:inline-flex; align-items:center; gap:.6rem;
+      padding:.5rem 1rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+      border: 1px solid rgba(255,255,255,.2);
+      color: var(--text);
+      font-size: .9rem;
+      font-weight: 500;
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float{
+      0%, 100%{ transform: translateY(0px); }
+      50%{ transform: translateY(-4px); }
+    }
+    @keyframes fadeInUp{
+      from{ opacity: 0; transform: translateY(20px); }
+      to{ opacity: 1; transform: translateY(0); }
+    }
+    .animate-in{
+      animation: fadeInUp .6s ease-out;
+    }
+    .muted{ color: var(--muted); }
+    .form-control, .form-select{
+      background: rgba(0,0,0,.3);
+      border: 1px solid rgba(255,255,255,.18);
+      color: var(--text);
+      padding: .65rem 1rem;
+      border-radius: 12px;
+      transition: all .3s ease;
+    }
+    .form-control:focus, .form-select:focus{
+      border-color: var(--accent1);
+      box-shadow: 0 0 0 .25rem rgba(102, 126, 234, .15);
+      background: rgba(0,0,0,.35);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+    .form-control::placeholder{
+      color: rgba(255,255,255,.4);
+    }
+    .btn-primary{
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      border: none;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, .3);
+      padding: .65rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all .3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary::before{
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+      transition: left .5s ease;
+    }
+    .btn-primary:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(102, 126, 234, .4);
+    }
+    .btn-primary:hover::before{
+      left: 100%;
+    }
+    .btn-outline-light{
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      padding: .65rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 500;
+      transition: all .3s ease;
+    }
+    .btn-outline-light:hover{
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.35);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    }
+    .metric{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 1rem 1.25rem;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.15);
+      transition: all .3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .metric::before{
+      content: '';
+      position: absolute;
+      left: 0; top: 0;
+      width: 3px; height: 100%;
+      background: linear-gradient(180deg, var(--accent1), var(--accent2));
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    .metric:hover{
+      background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      transform: translateX(4px);
+      border-color: rgba(255,255,255,.25);
+    }
+    .metric:hover::before{
+      opacity: 1;
+    }
+    .metric .label{ 
+      color: var(--muted); 
+      font-size: .92rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .metric .value{ 
+      font-weight: 700; 
+      font-size: 1.15rem;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .table{
+      --bs-table-bg: transparent;
+      --bs-table-color: var(--text);
+      --bs-table-border-color: rgba(255,255,255,.14);
+    }
+    .table thead th{
+      color: rgba(255,255,255,.85);
+      border-bottom-color: rgba(255,255,255,.18)!important;
+    }
+    .nav-tabs{
+      border: none;
+      gap: .5rem;
+      margin-bottom: 2rem !important;
+    }
+    .nav-tabs .nav-link{
+      color: rgba(255,255,255,.65);
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(0,0,0,.2);
+      border-radius: 14px;
+      padding: .75rem 1.5rem;
+      font-weight: 500;
+      transition: all .3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-tabs .nav-link::before{
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      transform: scaleX(0);
+      transition: transform .3s ease;
+    }
+    .nav-tabs .nav-link:hover{
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+      transform: translateY(-2px);
+    }
+    .nav-tabs .nav-link.active{
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.15));
+      border-color: rgba(255,255,255,.25);
+      box-shadow: 0 4px 16px rgba(102, 126, 234, .2);
+    }
+    .nav-tabs .nav-link.active::before{
+      transform: scaleX(1);
+    }
+    .alert{
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.08));
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      backdrop-filter: blur(10px);
+    }
+    .alert-danger{
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.08));
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .accordion-button{
+      background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      color: var(--text);
+      border-radius: 14px !important;
+      border: 1px solid rgba(255,255,255,.15);
+      padding: 1.25rem 1.5rem;
+      font-weight: 500;
+      transition: all .3s ease;
+    }
+    .accordion-button:not(.collapsed){
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.15));
+      border-color: rgba(255,255,255,.25);
+      box-shadow: 0 4px 16px rgba(102, 126, 234, .15);
+    }
+    .accordion-button:hover{
+      background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      transform: translateX(4px);
+    }
+    .accordion-button::after{
+      filter: brightness(0) invert(1);
+    }
+    .accordion-item{
+      background: transparent;
+      border: none;
+      margin-bottom: 1rem;
+    }
+    .accordion-body{
+      background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.15);
+      border-top: none;
+      border-radius: 0 0 14px 14px;
+      padding: 1.5rem;
+      margin-top: -1px;
+    }
+    .small-hint{ 
+      font-size: .88rem; 
+      color: var(--muted); 
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .small-hint::before{
+      content: '💡';
+      font-size: 1rem;
+    }
+    code{ 
+      color: #9ef;
+      background: rgba(158, 255, 255, 0.1);
+      padding: .2rem .5rem;
+      border-radius: 6px;
+      font-size: .9em;
+      border: 1px solid rgba(158, 255, 255, 0.2);
+    }
+    .badge{
+      padding: .5rem 1rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: .85rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    }
+    .text-bg-light{
+      background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,255,255,.85)) !important;
+      color: #1a1a2e !important;
+    }
+    h1, h2, h3{
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+    .fw-bold{
+      font-weight: 700 !important;
+      letter-spacing: -.01em;
+    }
+    .container{
+      position: relative;
+      z-index: 1;
+    }
+    @media (max-width: 768px){
+      .metric .value{
+        font-size: 1rem;
+      }
+      .brand-badge{
+        font-size: .85rem;
+        padding: .4rem .8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container py-4 py-md-5">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-5 animate-in">
+      <div>
+        <div class="brand-badge mb-3">
+          <i class="bi bi-diagram-3"></i>
+          <span>Herramienta interactiva</span>
+        </div>
+        <h1 class="h2 mb-2 fw-bold" style="font-size: 2.5rem;">Balance de Línea</h1>
+        <div class="muted" style="font-size: 1.05rem;">Calcula indicadores iniciales, balance con MCD y escenarios por demanda.</div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-outline-light" id="btnEjemplo">
+          <i class="bi bi-magic me-2"></i> Cargar ejemplo
+        </button>
+        <button class="btn btn-primary" id="btnCalcular">
+          <i class="bi bi-play-fill me-2"></i> Calcular
+        </button>
+      </div>
+    </div>
+
+    <!-- Inputs -->
+    <div class="glass p-4 p-md-5 mb-5 animate-in" style="animation-delay: .1s;">
+      <div class="row g-4 align-items-end">
+        <div class="col-12 col-md-4">
+          <label class="form-label fw-semibold" style="font-size: .95rem;">
+            <i class="bi bi-hash me-2" style="color: var(--accent1);"></i> Cantidad de estaciones/operaciones (k)
+          </label>
+          <input type="number" min="1" class="form-control" id="kInput" placeholder="Ej: 8">
+        </div>
+
+        <div class="col-12 col-md-8">
+          <label class="form-label fw-semibold" style="font-size: .95rem;">
+            <i class="bi bi-clock-history me-2" style="color: var(--accent2);"></i> Tiempos Ti (min/unidad)
+          </label>
+          <input type="text" class="form-control" id="tiInput"
+                 placeholder="Ej: 3, 2.2, 1, 6.6, 7, 9, 0.6, 1">
+          <div class="small-hint mt-2">
+            Puedes separar por coma o punto y coma. Ej: <code>3, 2.2, 1; 6.6</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3" id="alertBox" style="display:none;"></div>
+    </div>
+
+    <!-- Results -->
+    <div class="glass p-4 p-md-5 animate-in" style="animation-delay: .2s;">
+      <ul class="nav nav-tabs border-0" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabInicial" type="button" role="tab">
+            <i class="bi bi-speedometer2 me-2"></i> Inicial
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabMCD" type="button" role="tab">
+            <i class="bi bi-sliders me-2"></i> Punto 2 (MCD)
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDemanda" type="button" role="tab">
+            <i class="bi bi-graph-up-arrow me-2"></i> Demandas
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <!-- TAB: INICIAL -->
+        <div class="tab-pane fade show active" id="tabInicial" role="tabpanel">
+          <div class="row g-4">
+            <div class="col-12 col-lg-6">
+              <div class="glass-strong p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <div class="fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-activity me-2" style="color: var(--accent1);"></i> Indicadores
+                  </div>
+                  <span class="badge text-bg-light text-dark" id="bottleneckBadge" style="display:none;"></span>
+                </div>
+                <div class="d-grid gap-3" id="inicialMetrics"></div>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6">
+              <div class="glass-strong p-4 h-100">
+                <div class="fw-bold mb-3" style="font-size: 1.1rem;">
+                  <i class="bi bi-list-task me-2" style="color: var(--accent2);"></i> Detalle por estación
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th style="padding: .75rem;">Estación</th>
+                        <th style="padding: .75rem;">Ti (min/unid)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaInicial"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: MCD -->
+        <div class="tab-pane fade" id="tabMCD" role="tabpanel">
+          <div class="row g-4">
+            <div class="col-12 col-lg-6">
+              <div class="glass-strong p-4">
+                <div class="fw-bold mb-3" style="font-size: 1.1rem;">
+                  <i class="bi bi-sliders2-vertical me-2" style="color: var(--accent1);"></i> Resultados con MCD + balance
+                </div>
+                <div class="d-grid gap-3" id="mcdMetrics"></div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <div class="glass-strong p-4">
+                <div class="fw-bold mb-3" style="font-size: 1.1rem;">
+                  <i class="bi bi-table me-2" style="color: var(--accent2);"></i> Detalle por estación (MCD)
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th style="padding: .75rem;">Estación</th>
+                        <th style="padding: .75rem;">Ti</th>
+                        <th style="padding: .75rem;">Máquinas</th>
+                        <th style="padding: .75rem;">T'</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaMCD"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: DEMANDA -->
+        <div class="tab-pane fade" id="tabDemanda" role="tabpanel">
+          <div class="glass-strong p-4 mb-4">
+            <div class="row g-4 align-items-end">
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold" style="font-size: .95rem;">
+                  <i class="bi bi-bullseye me-2" style="color: var(--success);"></i> Demanda (unid/h)
+                </label>
+                <input type="number" min="0.0001" step="0.01" class="form-control" id="demandaInput" placeholder="Ej: 15">
+              </div>
+              <div class="col-12 col-md-6 d-flex gap-2">
+                <button class="btn btn-primary w-100" id="btnAgregarDemanda">
+                  <i class="bi bi-plus-circle me-2"></i> Agregar escenario
+                </button>
+                <button class="btn btn-outline-light" id="btnLimpiarDemandas">
+                  <i class="bi bi-trash me-1"></i>
+                </button>
+              </div>
+            </div>
+            <div class="small-hint mt-3">
+              Cada escenario guarda sus resultados (como tu <code>while</code>), en un historial.
+            </div>
+          </div>
+
+          <div id="demandasEmpty" class="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            Aún no hay escenarios. Ingresa una demanda y presiona "Agregar escenario".
+          </div>
+
+          <div class="accordion" id="accordionDemandas"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-5 pt-4" style="border-top: 1px solid rgba(255,255,255,.1);">
+      <div class="muted small text-center">
+        <i class="bi bi-shield-check me-2" style="color: var(--success);"></i>
+        Esto corre <b>100% en el navegador</b> (no necesita servidor). Si después quieres guardarlo en BD o generar PDF, ahí sí conviene un backend.
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ===== Helpers =====
+    const fmt2 = (x) => Number.isFinite(x) ? x.toFixed(2) : "—";
+
+    function showAlert(type, msg){
+      const box = document.getElementById("alertBox");
+      box.style.display = "block";
+      box.className = `alert alert-${type}`;
+      box.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i> ${msg}`;
+    }
+    function hideAlert(){
+      const box = document.getElementById("alertBox");
+      box.style.display = "none";
+      box.innerHTML = "";
+      box.className = "";
+    }
+
+    function parseTi(raw){
+      const parts = raw.replaceAll(";", ",").split(",")
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+
+      const Ti = parts.map(v => Number(v));
+      if (Ti.some(x => !Number.isFinite(x))) throw new Error("Hay valores de tiempo que no son números.");
+      return Ti;
+    }
+
+    function gcd(a,b){
+      a = Math.abs(a); b = Math.abs(b);
+      while (b !== 0){
+        const t = a % b;
+        a = b;
+        b = t;
+      }
+      return a;
+    }
+
+    function mcdDecimales(lista, decimales=2){
+      const escala = 10 ** decimales;
+      const enteros = lista.map(x => Math.round(x * escala));
+      if (enteros.length === 0) return 0;
+      let g = enteros[0];
+      for (let i=1; i<enteros.length; i++){
+        g = gcd(g, enteros[i]);
+      }
+      return g / escala;
+    }
+
+    function sum(arr){ return arr.reduce((a,b)=>a+b,0); }
+    function max(arr){ return arr.reduce((a,b)=> (a>b?a:b), -Infinity); }
+
+    function calcInicial(k, Ti){
+      const sum_T = sum(Ti);
+      const c = max(Ti);
+      const prod = 60 / c;
+      const tm = k * c - sum_T;
+      const ef = (sum_T / (k * c)) * 100;
+      const idx = Ti.indexOf(c) + 1;
+      return {sum_T, c, prod, tm, ef, bottleneckIdx: idx};
+    }
+
+    function calcMCD(k, Ti){
+      const sum_T = sum(Ti);
+      const c_obj = mcdDecimales(Ti, 2);
+
+      const maquinas_opt = Ti.map(t => Math.max(1, Math.ceil(t / c_obj)));
+      const Ti_opt = Ti.map((t,i) => t / maquinas_opt[i]);
+
+      const c_real = max(Ti_opt);
+      const prod = 60 / c_real;
+      const tm = k * c_real - sum(Ti_opt);
+      const n_total = sum(maquinas_opt);
+      const ef = (sum_T / (n_total * c_real)) * 100;
+
+      return {c_obj, c_real, prod, tm, n_total, ef, maquinas_opt, Ti_opt};
+    }
+
+    function calcDemanda(k, Ti, demanda){
+      const sum_T = sum(Ti);
+      const c_req = 60 / demanda;
+
+      const maquinas = Ti.map(t => Math.max(1, Math.ceil(t / c_req)));
+      const Ti_balance = Ti.map((t,i) => t / maquinas[i]);
+
+      const c_real = max(Ti_balance);
+      const prod_real = 60 / c_real;
+      const tm_real = k * c_real - sum(Ti_balance);
+      const n_total = sum(maquinas);
+      const ef_real = (sum_T / (n_total * c_real)) * 100;
+
+      return {demanda, c_req, c_real, prod_real, tm_real, n_total, ef_real, maquinas, Ti_balance};
+    }
+
+    // ===== UI rendering =====
+    function metricRow(label, value){
+      return `
+        <div class="metric">
+          <div class="label">${label}</div>
+          <div class="value">${value}</div>
+        </div>
+      `;
+    }
+
+    function renderInicial(k, Ti){
+      const r = calcInicial(k, Ti);
+
+      // metrics
+      const metrics = document.getElementById("inicialMetrics");
+      metrics.innerHTML = [
+        metricRow("ΣTi (min/unid)", fmt2(r.sum_T)),
+        metricRow("Ciclo (c) (min/unid)", fmt2(r.c)),
+        metricRow("Producción (unid/h)", fmt2(r.prod)),
+        metricRow("Tiempo muerto (min/unid)", fmt2(r.tm)),
+        metricRow("Eficiencia (%)", fmt2(r.ef) + "%")
+      ].join("");
+
+      // bottleneck badge
+      const badge = document.getElementById("bottleneckBadge");
+      badge.style.display = "inline-block";
+      badge.textContent = `Cuello de botella: Operación ${r.bottleneckIdx} (T=${fmt2(r.c)})`;
+
+      // table
+      const tb = document.getElementById("tablaInicial");
+      tb.innerHTML = Ti.map((t, i) => `
+        <tr style="transition: all .3s ease;">
+          <td class="fw-semibold" style="padding: .75rem;">
+            <span style="display: inline-flex; align-items: center; gap: .5rem;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--accent1), var(--accent2));"></span>
+              Estación ${String(i+1).padStart(2,"0")}
+            </span>
+          </td>
+          <td style="padding: .75rem; color: var(--text);">${fmt2(t)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderMCD(k, Ti){
+      const r = calcMCD(k, Ti);
+
+      const metrics = document.getElementById("mcdMetrics");
+      metrics.innerHTML = [
+        metricRow("Ciclo objetivo (MCD) (min/unid)", fmt2(r.c_obj)),
+        metricRow("Ciclo real logrado (min/unid)", fmt2(r.c_real)),
+        metricRow("Producción (unid/h)", fmt2(r.prod)),
+        metricRow("Tiempo muerto (min/unid)", fmt2(r.tm)),
+        metricRow("Eficiencia (%)", fmt2(r.ef) + "%"),
+        metricRow("Máquinas totales", r.n_total)
+      ].join("");
+
+      const tb = document.getElementById("tablaMCD");
+      tb.innerHTML = Ti.map((t, i) => `
+        <tr style="transition: all .3s ease;">
+          <td class="fw-semibold" style="padding: .75rem;">
+            <span style="display: inline-flex; align-items: center; gap: .5rem;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--accent1), var(--accent2));"></span>
+              Estación ${String(i+1).padStart(2,"0")}
+            </span>
+          </td>
+          <td style="padding: .75rem;">${fmt2(t)}</td>
+          <td style="padding: .75rem;">
+            <span style="background: rgba(102, 126, 234, 0.15); padding: .25rem .6rem; border-radius: 8px; font-weight: 600;">${r.maquinas_opt[i]}</span>
+          </td>
+          <td style="padding: .75rem;">${fmt2(r.Ti_opt[i])}</td>
+        </tr>
+      `).join("");
+    }
+
+    let scenarioCount = 0;
+
+    function renderScenarioAccordionItem(k, Ti, scenario){
+      scenarioCount += 1;
+      const id = "sc" + scenarioCount;
+      const headingId = "hd" + scenarioCount;
+      const collapseId = "cl" + scenarioCount;
+
+      const title = `Demanda ${fmt2(scenario.demanda)} unid/h · Ciclo real ${fmt2(scenario.c_real)} · Máquinas ${scenario.n_total}`;
+
+      const metrics = [
+        metricRow("Demanda (unid/h)", `<span style="color: var(--success);">${fmt2(scenario.demanda)}</span>`),
+        metricRow("Ciclo requerido (min/unid)", fmt2(scenario.c_req)),
+        metricRow("Ciclo real (min/unid)", fmt2(scenario.c_real)),
+        metricRow("Producción real (unid/h)", fmt2(scenario.prod_real)),
+        metricRow("Tiempo muerto (min/unid)", fmt2(scenario.tm_real)),
+        metricRow("Eficiencia (%)", fmt2(scenario.ef_real) + "%"),
+        metricRow("Máquinas totales", `<span style="background: rgba(102, 126, 234, 0.2); padding: .3rem .7rem; border-radius: 8px; font-weight: 700;">${scenario.n_total}</span>`)
+      ].join("");
+
+      const rows = Ti.map((t, i) => `
+        <tr style="transition: all .3s ease;">
+          <td class="fw-semibold" style="padding: .75rem;">
+            <span style="display: inline-flex; align-items: center; gap: .5rem;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--accent1), var(--accent2));"></span>
+              Estación ${String(i+1).padStart(2,"0")}
+            </span>
+          </td>
+          <td style="padding: .75rem;">${fmt2(t)}</td>
+          <td style="padding: .75rem;">
+            <span style="background: rgba(102, 126, 234, 0.15); padding: .25rem .6rem; border-radius: 8px; font-weight: 600;">${scenario.maquinas[i]}</span>
+          </td>
+          <td style="padding: .75rem;">${fmt2(scenario.Ti_balance[i])}</td>
+        </tr>
+      `).join("");
+
+      return `
+        <div class="accordion-item mb-3" style="animation: fadeInUp .5s ease-out;">
+          <h2 class="accordion-header" id="${headingId}">
+            <button class="accordion-button collapsed" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#${collapseId}"
+                    aria-expanded="false" aria-controls="${collapseId}">
+              <i class="bi bi-graph-up me-3" style="color: var(--success);"></i> ${title}
+            </button>
+          </h2>
+          <div id="${collapseId}" class="accordion-collapse collapse" aria-labelledby="${headingId}">
+            <div class="accordion-body">
+              <div class="row g-4">
+                <div class="col-12 col-lg-5">
+                  <div class="d-grid gap-3">
+                    ${metrics}
+                  </div>
+                </div>
+                <div class="col-12 col-lg-7">
+                  <div class="fw-bold mb-3" style="font-size: 1.05rem;">
+                    <i class="bi bi-table me-2" style="color: var(--accent2);"></i> Detalle por estación
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th style="padding: .75rem;">Estación</th>
+                          <th style="padding: .75rem;">Ti</th>
+                          <th style="padding: .75rem;">Máquinas</th>
+                          <th style="padding: .75rem;">T'</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${rows}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ===== Main flow =====
+    function readInputs(){
+      const k = Number(document.getElementById("kInput").value);
+      const raw = document.getElementById("tiInput").value;
+
+      if (!Number.isInteger(k) || k <= 0) throw new Error("k debe ser un entero mayor que 0.");
+      if (!raw || raw.trim().length === 0) throw new Error("Debes ingresar los tiempos Ti.");
+
+      const Ti = parseTi(raw);
+      if (Ti.length !== k) throw new Error(`Debes ingresar exactamente ${k} tiempos. Ingresaste ${Ti.length}.`);
+      if (Ti.some(t => t <= 0)) throw new Error("Todos los tiempos deben ser > 0.");
+
+      return {k, Ti};
+    }
+
+    document.getElementById("btnCalcular").addEventListener("click", () => {
+      try{
+        hideAlert();
+        const {k, Ti} = readInputs();
+        renderInicial(k, Ti);
+        renderMCD(k, Ti);
+
+        // Si calculó bien, cambia a tab inicial (opcional)
+        const tab = new bootstrap.Tab(document.querySelector('[data-bs-target="#tabInicial"]'));
+        tab.show();
+      }catch(err){
+        showAlert("danger", err.message || "Error desconocido.");
+      }
+    });
+
+    document.getElementById("btnEjemplo").addEventListener("click", () => {
+      document.getElementById("kInput").value = 8;
+      document.getElementById("tiInput").value = "3, 2.2, 1, 6.6, 7, 9, 0.6, 1";
+      hideAlert();
+    });
+
+    document.getElementById("btnAgregarDemanda").addEventListener("click", () => {
+      try{
+        hideAlert();
+        const {k, Ti} = readInputs();
+        const demanda = Number(document.getElementById("demandaInput").value);
+
+        if (!Number.isFinite(demanda) || demanda <= 0) throw new Error("La demanda debe ser > 0.");
+
+        const scenario = calcDemanda(k, Ti, demanda);
+
+        document.getElementById("demandasEmpty").style.display = "none";
+        const acc = document.getElementById("accordionDemandas");
+        acc.insertAdjacentHTML("afterbegin", renderScenarioAccordionItem(k, Ti, scenario));
+
+        // Cambia a tab demandas
+        const tab = new bootstrap.Tab(document.querySelector('[data-bs-target="#tabDemanda"]'));
+        tab.show();
+
+        document.getElementById("demandaInput").value = "";
+      }catch(err){
+        showAlert("danger", err.message || "Error desconocido.");
+      }
+    });
+
+    document.getElementById("btnLimpiarDemandas").addEventListener("click", () => {
+      document.getElementById("accordionDemandas").innerHTML = "";
+      document.getElementById("demandasEmpty").style.display = "block";
+      scenarioCount = 0;
+    });
+  </script>
+</body>
+</html>

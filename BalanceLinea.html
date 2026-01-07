@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Balance de Línea</title>
-
-  <!-- Bootstrap + Icons (CDN) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
@@ -364,14 +362,10 @@
 </head>
 
 <body>
-  <div class="container py-4 py-md-5">
+  <div class="container py-4 py-md-4">
     <!-- Header -->
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-5 animate-in">
       <div>
-        <div class="brand-badge mb-3">
-          <i class="bi bi-diagram-3"></i>
-          <span>Herramienta interactiva</span>
-        </div>
         <h1 class="h2 mb-2 fw-bold" style="font-size: 2.5rem;">Balance de Línea</h1>
         <div class="muted" style="font-size: 1.05rem;">Calcula indicadores iniciales, balance con MCD y escenarios por demanda.</div>
       </div>
@@ -386,7 +380,7 @@
     </div>
 
     <!-- Inputs -->
-    <div class="glass p-4 p-md-5 mb-5 animate-in" style="animation-delay: .1s;">
+    <div class="glass p-4 p-md-4 mb-4 animate-in" style="animation-delay: .1s;">
       <div class="row g-4 align-items-end">
         <div class="col-12 col-md-4">
           <label class="form-label fw-semibold" style="font-size: .95rem;">
@@ -401,9 +395,9 @@
           </label>
           <input type="text" class="form-control" id="tiInput"
                  placeholder="Ej: 3, 2.2, 1, 6.6, 7, 9, 0.6, 1">
-          <div class="small-hint mt-2">
-            Puedes separar por coma o punto y coma. Ej: <code>3, 2.2, 1; 6.6</code>
-          </div>
+        </div>
+        <div class="small-hint mt-2">
+          En Tiempos Ti puedes separar por coma o punto y coma. Ej: <code>3, 2.2, 1; 6.6, 7, 9, 0.6, 1</code>
         </div>
       </div>
 
@@ -411,7 +405,7 @@
     </div>
 
     <!-- Results -->
-    <div class="glass p-4 p-md-5 animate-in" style="animation-delay: .2s;">
+    <div class="glass p-4 p-md-4 animate-in" style="animation-delay: .2s;">
       <ul class="nav nav-tabs border-0" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabInicial" type="button" role="tab">
@@ -419,13 +413,13 @@
           </button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabMCD" type="button" role="tab">
-            <i class="bi bi-sliders me-2"></i> Punto 2 (MCD)
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDemanda" type="button" role="tab">
+            <i class="bi bi-graph-up-arrow me-2"></i> Demandas
           </button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDemanda" type="button" role="tab">
-            <i class="bi bi-graph-up-arrow me-2"></i> Demandas
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabMCD" type="button" role="tab">
+            <i class="bi bi-sliders me-2"></i> Punto 2 (MCD)
           </button>
         </li>
       </ul>
@@ -536,7 +530,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // ===== Helpers =====
     const fmt2 = (x) => Number.isFinite(x) ? x.toFixed(2) : "—";
 
     function showAlert(type, msg){
@@ -556,7 +549,6 @@
       const parts = raw.replaceAll(";", ",").split(",")
         .map(s => s.trim())
         .filter(s => s.length > 0);
-
       const Ti = parts.map(v => Number(v));
       if (Ti.some(x => !Number.isFinite(x))) throw new Error("Hay valores de tiempo que no son números.");
       return Ti;
@@ -599,36 +591,29 @@
     function calcMCD(k, Ti){
       const sum_T = sum(Ti);
       const c_obj = mcdDecimales(Ti, 2);
-
       const maquinas_opt = Ti.map(t => Math.max(1, Math.ceil(t / c_obj)));
       const Ti_opt = Ti.map((t,i) => t / maquinas_opt[i]);
-
       const c_real = max(Ti_opt);
       const prod = 60 / c_real;
       const tm = k * c_real - sum(Ti_opt);
       const n_total = sum(maquinas_opt);
       const ef = (sum_T / (n_total * c_real)) * 100;
-
       return {c_obj, c_real, prod, tm, n_total, ef, maquinas_opt, Ti_opt};
     }
 
     function calcDemanda(k, Ti, demanda){
       const sum_T = sum(Ti);
       const c_req = 60 / demanda;
-
       const maquinas = Ti.map(t => Math.max(1, Math.ceil(t / c_req)));
       const Ti_balance = Ti.map((t,i) => t / maquinas[i]);
-
       const c_real = max(Ti_balance);
       const prod_real = 60 / c_real;
       const tm_real = k * c_real - sum(Ti_balance);
       const n_total = sum(maquinas);
       const ef_real = (sum_T / (n_total * c_real)) * 100;
-
       return {demanda, c_req, c_real, prod_real, tm_real, n_total, ef_real, maquinas, Ti_balance};
     }
 
-    // ===== UI rendering =====
     function metricRow(label, value){
       return `
         <div class="metric">
@@ -641,7 +626,6 @@
     function renderInicial(k, Ti){
       const r = calcInicial(k, Ti);
 
-      // metrics
       const metrics = document.getElementById("inicialMetrics");
       metrics.innerHTML = [
         metricRow("ΣTi (min/unid)", fmt2(r.sum_T)),
@@ -651,12 +635,10 @@
         metricRow("Eficiencia (%)", fmt2(r.ef) + "%")
       ].join("");
 
-      // bottleneck badge
       const badge = document.getElementById("bottleneckBadge");
       badge.style.display = "inline-block";
       badge.textContent = `Cuello de botella: Operación ${r.bottleneckIdx} (T=${fmt2(r.c)})`;
 
-      // table
       const tb = document.getElementById("tablaInicial");
       tb.innerHTML = Ti.map((t, i) => `
         <tr style="transition: all .3s ease;">
@@ -706,10 +688,8 @@
 
     function renderScenarioAccordionItem(k, Ti, scenario){
       scenarioCount += 1;
-      const id = "sc" + scenarioCount;
       const headingId = "hd" + scenarioCount;
       const collapseId = "cl" + scenarioCount;
-
       const title = `Demanda ${fmt2(scenario.demanda)} unid/h · Ciclo real ${fmt2(scenario.c_real)} · Máquinas ${scenario.n_total}`;
 
       const metrics = [
@@ -782,18 +762,14 @@
       `;
     }
 
-    // ===== Main flow =====
     function readInputs(){
       const k = Number(document.getElementById("kInput").value);
       const raw = document.getElementById("tiInput").value;
-
       if (!Number.isInteger(k) || k <= 0) throw new Error("k debe ser un entero mayor que 0.");
       if (!raw || raw.trim().length === 0) throw new Error("Debes ingresar los tiempos Ti.");
-
       const Ti = parseTi(raw);
       if (Ti.length !== k) throw new Error(`Debes ingresar exactamente ${k} tiempos. Ingresaste ${Ti.length}.`);
       if (Ti.some(t => t <= 0)) throw new Error("Todos los tiempos deben ser > 0.");
-
       return {k, Ti};
     }
 
@@ -803,8 +779,6 @@
         const {k, Ti} = readInputs();
         renderInicial(k, Ti);
         renderMCD(k, Ti);
-
-        // Si calculó bien, cambia a tab inicial (opcional)
         const tab = new bootstrap.Tab(document.querySelector('[data-bs-target="#tabInicial"]'));
         tab.show();
       }catch(err){
@@ -823,19 +797,13 @@
         hideAlert();
         const {k, Ti} = readInputs();
         const demanda = Number(document.getElementById("demandaInput").value);
-
         if (!Number.isFinite(demanda) || demanda <= 0) throw new Error("La demanda debe ser > 0.");
-
         const scenario = calcDemanda(k, Ti, demanda);
-
         document.getElementById("demandasEmpty").style.display = "none";
         const acc = document.getElementById("accordionDemandas");
         acc.insertAdjacentHTML("afterbegin", renderScenarioAccordionItem(k, Ti, scenario));
-
-        // Cambia a tab demandas
         const tab = new bootstrap.Tab(document.querySelector('[data-bs-target="#tabDemanda"]'));
         tab.show();
-
         document.getElementById("demandaInput").value = "";
       }catch(err){
         showAlert("danger", err.message || "Error desconocido.");
